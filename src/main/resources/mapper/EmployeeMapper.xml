@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kiosbankingbe.mapper.EmployeeMapper">
+    <select id="create" resultType="com.example.kiosbankingbe.model.response.EmployeeResponse"
+            parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        INSERT INTO employee (
+            code,
+            "name",
+            room,
+            phone,
+            max_customer,
+            account_id,
+            deleted,
+            create_date
+        )VALUES(
+            #{code},
+            #{name},
+            #{room},
+            #{phone},
+            #{maxCustomer},
+            #{accountId},
+            0,
+            NOW()
+        ) RETURNING *;
+    </select>
+
+    <select id="getEmployee" resultType="com.example.kiosbankingbe.model.response.EmployeeResponse"
+            parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        SELECT employee.*
+        FROM employee
+        <where>
+            <if test="code !=null and code !=''">
+                employee.code = #{code}
+            </if>
+            <if test="name !=null and name !=''">
+                AND employee.name ILIKE CONCAT('%' || #{name} || '%')
+            </if>
+            <if test="phone !=null and phone !=''">
+                AND employee.phone = #{phone}
+            </if>
+            <if test="room !=null and room !=''">
+                AND employee.room = #{room}
+            </if>
+            <if test="deletedDate != null and deletedDate != ''">
+                AND TO_CHAR(deleted_date, 'yyyy-mm-dd') = #{deletedDate}
+            </if>
+            <if test="deleted != null">
+                AND deleted = #{deleted}
+            </if>
+        </where>
+
+        ORDER BY employee.code ASC
+
+
+        <if test="limit > 0">
+            OFFSET (#{page} - 1) * #{limit} FETCH NEXT #{limit} ROWS ONLY
+        </if>
+    </select>
+
+    <select id="getEmployeeByRole" resultType="com.example.kiosbankingbe.model.response.EmployeeResponse"
+            parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        SELECT employee.*
+        FROM employee
+        LEFT JOIN employee_role ON employee.id = employee_role.employee_id
+        <where>
+            <if test="role !=null">
+                <foreach collection="role" item="item">
+                    AND employee_role.service_id = #{item}
+                </foreach>
+            </if>
+            AND deleted != 1 OR deleted IS NULL
+        </where>
+
+        ORDER BY employee.create_date ASC
+
+        <if test="limit > 0">
+            OFFSET (#{page} - 1) * #{limit} FETCH NEXT #{limit} ROWS ONLY
+        </if>
+    </select>
+
+    <select id="getAll" resultType="com.example.kiosbankingbe.model.response.EmployeeResponse">
+        SELECT * FROM employee
+        LEFT JOIN user_account ON employee.account_id = user_account.id
+        WHERE user_account.role = 'EMPLOYEE' AND deleted != 1 OR deleted IS NULL
+    </select>
+
+    <select id="countEmployee" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest"
+            resultType="integer">
+        SELECT count(*) FROM employee
+        <where>
+            <if test="code !=null and code !=''">
+                employee.code = #{code}
+            </if>
+            <if test="name !=null and name !=''">
+                AND employee.name ILIKE CONCAT('%' || #{name} || '%')
+            </if>
+            <if test="phone !=null and phone !=''">
+                AND phone = #{phone}
+            </if>
+            <if test="room !=null and room !=''">
+                AND room = #{room}
+            </if>
+            <if test="deletedDate != null and deletedDate != ''">
+                AND TO_CHAR(deleted_date, 'yyyy-mm-dd') = #{deletedDate}
+            </if>
+            <if test="deleted != null">
+                AND deleted = #{deleted}
+            </if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        UPDATE employee
+        SET
+            "name" = #{name},
+            phone = #{phone},
+            room = #{room},
+            max_customer = #{maxCustomer}
+        WHERE id = #{id}::uuid
+    </update>
+
+    <delete id="delete" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        UPDATE employee
+        SET
+            deleted = #{deleted},
+            deleted_date = NOW()
+        WHERE id = #{id}::uuid
+    </delete>
+
+    <select id="checkInfo" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest"
+            resultType="integer">
+        SELECT count(*) FROM employee
+        WHERE code = #{code}
+    </select>
+
+    <select id="getAccountId" resultType="String" parameterType="String">
+        SELECT account_id FROM employee
+        WHERE id = #{employeeId} AND deleted != 1 OR deleted IS NULL
+    </select>
+
+    <select id="getId" resultType="Integer">
+        SELECT COUNT(*) + 1 FROM employee
+    </select>
+
+    <update id="restore" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        UPDATE employee
+        SET
+            deleted = 0,
+            restore_date = NOW()
+        WHERE id = #{id}::uuid
+    </update>
+
+    <delete id="remove" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        DELETE FROM employee
+        WHERE id = #{id}::uuid
+    </delete>
+</mapper>

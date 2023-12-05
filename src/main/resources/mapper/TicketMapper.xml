@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kiosbankingbe.mapper.TicketMapper">
+    <select id="get" parameterType="com.example.kiosbankingbe.model.request.TicketRequest"
+            resultType="com.example.kiosbankingbe.model.response.TicketResponse">
+        SELECT ticket.*, employee.room
+        FROM ticket
+        LEFT JOIN employee ON ticket.employee_id = employee.id
+        LEFT JOIN service_banking ON ticket.service_id = service_banking.id
+
+        <where>
+            <if test="phone != null and phone !='' ">
+                and ticket.phone = #{phone}
+            </if>
+            <if test="code != null and code !='' ">
+                and ticket.code = #{code}
+            </if>
+            <if test="name != null and name !='' ">
+                and ticket.name ILIKE CONCAT('%' || #{name} || '%')
+            </if>
+            <if test="date != null and date !='' ">
+                and TO_CHAR(ticket.date, 'yyyy-mm-dd') = #{date}
+            </if>
+            <if test="time != null and date !='' ">
+                and TO_CHAR(ticket.time, 'HH24:MI:SS') = #{time}
+            </if>
+            <if test="employeeId != null and employeeId !='' ">
+                and employee.id = #{employeeId}::uuid
+            </if>
+            <if test="serviceId != null and serviceId !='' ">
+                and service_banking.id = #{serviceId}::uuid
+            </if>
+            <if test="accountId != null and accountId !='' ">
+                and employee.account_id = #{accountId}::uuid
+            </if>
+        </where>
+
+        ORDER BY date, status DESC
+
+        <if test="limit >0">
+            OFFSET (#{page} - 1) * #{limit} FETCH NEXT #{limit} ROWS ONLY
+        </if>
+    </select>
+
+    <select id="getForTV" parameterType="com.example.kiosbankingbe.model.request.TicketRequest"
+            resultType="com.example.kiosbankingbe.model.response.TicketResponse">
+        SELECT ticket.*, employee.room
+        FROM ticket
+        LEFT JOIN employee ON ticket.employee_id = employee.id
+        LEFT JOIN service_banking ON ticket.service_id = service_banking.id
+
+        <where>
+            <if test="date != null and date !='' ">
+                and TO_CHAR(ticket.date, 'yyyy-mm-dd') = #{date}
+            </if>
+            and 2 > status
+        </where>
+        ORDER BY status DESC
+        limit 10
+    </select>
+
+    <select id="countTicket" parameterType="com.example.kiosbankingbe.model.request.TicketRequest" resultType="Integer">
+        select count(*) from ticket
+        LEFT JOIN employee ON ticket.employee_id = employee.id
+        LEFT JOIN service_banking ON ticket.service_id = service_banking.id
+
+        <where>
+            <if test="phone != null and phone !='' ">
+                and ticket.phone = #{phone}
+            </if>
+            <if test="code != null and code !='' ">
+                and ticket.code = #{code}
+            </if>
+            <if test="name != null and name !='' ">
+                and ticket.name ILIKE CONCAT('%' || #{name} || '%')
+            </if>
+            <if test="date != null and date !='' ">
+                and TO_CHAR(ticket.date, 'yyyy-mm-dd') = #{date}
+            </if>
+            <if test="time != null and date !='' ">
+                and TO_CHAR(ticket.time, 'HH24:MI:SS') = #{time}
+            </if>
+            <if test="employeeId != null and employeeId !='' ">
+                and employee.id = #{employeeId}::uuid
+            </if>
+            <if test="serviceId != null and serviceId !='' ">
+                and service_banking.id = #{serviceId}::uuid
+            </if>
+            <if test="accountId != null and accountId !='' ">
+                and employee.account_id = #{accountId}::uuid
+            </if>
+        </where>
+    </select>
+
+    <select id="create" parameterType="com.example.kiosbankingbe.model.request.TicketRequest"
+            resultType="com.example.kiosbankingbe.model.response.TicketResponse">
+        INSERT INTO ticket("name",
+                           phone,
+                           "date",
+                           "time",
+                           service_id,
+                           employee_id,
+                           code,
+                           status,
+                           stt)
+        VALUES (#{name},
+                #{phone},
+                #{date},
+                #{time},
+                #{serviceId},
+                #{employeeId},
+                #{code},
+                #{status},
+                #{stt}) RETURNING *;
+    </select>
+
+    <update id="update" parameterType="com.example.kiosbankingbe.model.request.TicketRequest">
+        UPDATE ticket
+        SET "name"      = #{name},
+            phone       = #{phone},
+            service_id  = #{serviceId},
+            employee_id = #{employeeId},
+            status      = #{status}
+        WHERE id = #{id}::uuid
+    </update>
+
+    <update id="evaluate" parameterType="com.example.kiosbankingbe.model.request.TicketRequest">
+        UPDATE ticket
+        SET attitude = #{attitude},
+            comment  = #{comment}
+        WHERE id = #{id}::uuid
+    </update>
+
+    <select id="statisticTicketDone" parameterType="String" resultType="Integer">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE TO_CHAR("date", 'yyyy-mm') = CONCAT(CAST(EXTRACT(YEAR FROM CURRENT_DATE) AS VARCHAR) || '-' || #{month})
+          AND status = 2
+    </select>
+
+    <select id="statisticTicketInProgress" parameterType="String" resultType="Integer">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE TO_CHAR("date", 'yyyy-mm') = CONCAT(CAST(EXTRACT(YEAR FROM CURRENT_DATE) AS VARCHAR) || '-' || #{month})
+          AND status = 1
+    </select>
+
+    <select id="statisticTicketNotStart" parameterType="String" resultType="Integer">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE TO_CHAR("date", 'yyyy-mm') = CONCAT(CAST(EXTRACT(YEAR FROM CURRENT_DATE) AS VARCHAR) || '-' || #{month})
+          AND status != 1 AND status != 2
+    </select>
+
+    <select id="countDoneTicket" parameterType="com.example.kiosbankingbe.model.request.TicketRequest"
+            resultType="Integer">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE status = 2
+    </select>
+
+    <select id="countInProgressTicket" parameterType="com.example.kiosbankingbe.model.request.TicketRequest"
+            resultType="Integer">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE status = 1
+    </select>
+
+    <select id="countNotStartTicket" parameterType="com.example.kiosbankingbe.model.request.TicketRequest"
+            resultType="Integer">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE status = 0
+    </select>
+
+    <select id="statisticEmployee"
+            resultType="com.example.kiosbankingbe.model.response.EmployeeResponse">
+        select employee.*, count(*) as sumService
+        from ticket
+        left join employee on ticket.employee_id = employee.id
+        left join user_account on employee.account_id = user_account.id
+        <where>
+            <if test="date != null and date != ''">
+                and ticket.date = #{date}
+            </if>
+            <if test="month != null and month != ''">
+                and TO_CHAR(ticket.date, 'yyyy-mm') = #{month}
+            </if>
+            <if test="year != null and year != ''">
+                and TO_CHAR(ticket.date, 'yyyy') = #{year}
+            </if>
+            and ticket.status = 2
+            and user_account.role = 'EMPLOYEE'
+            and employee.id = #{id}::uuid
+        </where>
+        group by employee.id;
+    </select>
+</mapper>

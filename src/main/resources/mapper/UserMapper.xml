@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kiosbankingbe.mapper.UserMapper">
+    <select id="finAccountByUsername" resultType="com.example.kiosbankingbe.model.response.UserResponse">
+        select *
+        from user_account
+        where username = #{userName}
+        limit 1;
+    </select>
+
+    <select id="checkUsernameExistion" resultType="com.example.kiosbankingbe.model.response.UserResponse" parameterType="String">
+        select * from user_account
+        where username = #{userName}
+    </select>
+
+    <select id="createEmployeeAccount" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest"
+            resultType="com.example.kiosbankingbe.model.response.UserResponse">
+        INSERT INTO user_account (
+            "name",
+            username,
+            password,
+            role
+        )VALUES(
+            #{name},
+            #{userName},
+            #{password},
+            #{roleCode}
+        )
+        RETURNING *;
+    </select>
+<!--    <select id="getUserByRole" resultType="com.example.kiosbankingbe.model.response.UserResponse">-->
+<!--        select role-->
+<!--        from user_account-->
+<!--        where username = #{userName}-->
+<!--    </select>-->
+</mapper>

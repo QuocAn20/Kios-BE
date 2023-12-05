@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kiosbankingbe.mapper.ServiceBankingMapper">
+    <select id="create" parameterType="com.example.kiosbankingbe.model.request.ServiceBankingRequest"
+            resultType="com.example.kiosbankingbe.model.response.ServiceBankingResponse">
+        INSERT INTO service_banking(
+            "name",
+            image,
+            description,
+            deleted,
+            create_date
+        )VALUES(
+            #{name},
+            #{image},
+            #{description},
+            0,
+            NOW()
+        )
+        RETURNING *;
+    </select>
+
+    <select id="get" parameterType="com.example.kiosbankingbe.model.request.ServiceBankingRequest"
+            resultType="com.example.kiosbankingbe.model.response.ServiceBankingResponse">
+        SELECT * FROM service_banking
+        <where>
+            <if test="name != null and name != '' ">
+                and "name" ILIKE CONCAT('%' || #{name} || '%')
+            </if>
+            <if test="deleted != null">
+                and deleted = #{deleted}
+            </if>
+            <if test="deletedDate !=null and deletedDate != ''">
+                and TO_CHAR(deleted_date, 'yyyy-MM-dd')  = #{deletedDate}
+            </if>
+        </where>
+
+        order by name ASC
+
+        <if test="limit > 0">
+            OFFSET (#{page} - 1) * #{limit} FETCH NEXT #{limit} ROWS ONLY
+        </if>
+    </select>
+
+    <select id="countService" parameterType="com.example.kiosbankingbe.model.request.ServiceBankingRequest"
+        resultType="Integer">
+        SELECT COUNT(*) FROM service_banking
+        <where>
+            <if test="name != null and name != '' ">
+                and "name" ILIKE CONCAT('%' || #{name} || '%')
+            </if>
+            <if test="deleted != null">
+                and deleted = #{deleted}
+            </if>
+            <if test="deletedDate !=null and deletedDate != ''">
+                and TO_CHAR(deleted_date, 'yyyy-mm-dd')  = #{deletedDate}
+            </if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="com.example.kiosbankingbe.model.request.ServiceBankingRequest">
+        UPDATE service_banking
+        SET
+            "name" = #{name},
+            "image" = #{image},
+            "description" = #{description},
+            edit_date = NOW()
+        WHERE id = #{id}::uuid
+    </update>
+
+    <delete id="delete" parameterType="com.example.kiosbankingbe.model.request.ServiceBankingRequest">
+        UPDATE service_banking
+        SET
+            deleted = #{deleted},
+            deleted_date = NOW()
+        WHERE id = #{id}::uuid
+    </delete>
+
+    <update id="restore" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        UPDATE service_banking
+        SET
+            deleted = 0,
+            restore_date = NOW()
+        WHERE id = #{id}::uuid
+    </update>
+
+    <delete id="remove" parameterType="com.example.kiosbankingbe.model.request.EmployeeRequest">
+        DELETE FROM service_banking
+        WHERE id = #{id}::uuid
+    </delete>
+</mapper>
+
