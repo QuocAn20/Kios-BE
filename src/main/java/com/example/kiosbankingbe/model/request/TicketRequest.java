@@ -4,6 +4,7 @@ import com.example.kiosbankingbe.model.dto.Paging;
 import lombok.*;
 
 import javax.persistence.Entity;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ public class TicketRequest extends Paging {
     private String id;
     private String name;
     private String phone;
-    private String date;
+    private Date date;
     private String time;
     private String serviceId;
     private String employeeId;
