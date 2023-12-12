@@ -6,7 +6,6 @@ import com.example.kiosbankingbe.model.response.TicketResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -35,6 +34,6 @@ public interface TicketMapper {
 
     public int countDoneTicket(TicketRequest request);
 
-    public EmployeeResponse statisticEmployee(@Param("id") String id, @Param("date") Date date,
+    public EmployeeResponse statisticEmployee(@Param("id") String id, @Param("date")String date,
                                               @Param("month")String month, @Param("year")String year);
 }

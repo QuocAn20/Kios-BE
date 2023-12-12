@@ -2,8 +2,6 @@ package com.example.kiosbankingbe.model.response;
 
 import lombok.*;
 
-import java.util.Date;
-
 @Getter
 @Data
 @Setter
@@ -13,7 +11,7 @@ public class TicketResponse {
     private String id;
     private String name;
     private String phone;
-    private Date date;
+    private String date;
     private String time;
     private String serviceId;
     private String employeeId;
