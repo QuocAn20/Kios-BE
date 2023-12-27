@@ -75,9 +75,6 @@ public class TicketServiceImpl implements ITicketService {
     public BaseResponse createTicket(TicketRequest request) {
         try {
             TicketResponse result = mapper.create(request);
-//            String accountId = employeeMapper.getAccountId(request.getEmployeeId());
-//            messagingTemplate.convertAndSend("/topic/create", result);
-//            messagingTemplate.convertAndSendToUser(accountId, "/private", result);
 
             if (result != null) {
                 return new BaseResponse(result, "0", "Create successfully");
@@ -87,14 +84,6 @@ public class TicketServiceImpl implements ITicketService {
             return new BaseResponse("-1", "fail");
         }
     }
-
-//    @Override
-//    public BaseResponse fakeCreateTicket(TicketRequest request) {
-//
-//        messagingTemplate.convertAndSend("/topic/create", request);
-//
-//        return new BaseResponse(request, "0", "Create successfully");
-//    }
 
     @Override
     public BaseResponse updateTicket(TicketRequest request) {
@@ -107,6 +96,21 @@ public class TicketServiceImpl implements ITicketService {
             if (result > 0) {
                 return new BaseResponse(result, "0", "Update successfully");
             } else return new BaseResponse("1", "Update failed");
+
+        } catch (Exception e) {
+            return new BaseResponse("-1", "fail");
+        }
+    }
+
+    @Override
+    public BaseResponse deleteTicket(TicketRequest request) {
+        try {
+
+            int result = mapper.delete(request);
+
+            if (result > 0) {
+                return new BaseResponse(result, "0", "Delete successfully");
+            } else return new BaseResponse("1", "Delete failed");
 
         } catch (Exception e) {
             return new BaseResponse("-1", "fail");

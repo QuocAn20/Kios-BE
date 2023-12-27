@@ -1,5 +1,6 @@
 package com.example.kiosbankingbe.controller;
 
+import com.example.kiosbankingbe.model.request.EmployeeRequest;
 import com.example.kiosbankingbe.model.request.TicketRequest;
 import com.example.kiosbankingbe.model.response.BaseResponse;
 import com.example.kiosbankingbe.service.ITicketService;
@@ -105,5 +106,10 @@ public class TicketController {
         } catch (FileNotFoundException e) {
             throw new ServiceException("Failed");
         }
+    }
+
+    @PostMapping(value = "/deleteTicket", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<BaseResponse> deleteTicket(@RequestBody TicketRequest request){
+        return new ResponseEntity<>(ticketService.deleteTicket(request), HttpStatus.OK);
     }
 }

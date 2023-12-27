@@ -124,6 +124,11 @@
         WHERE id = #{id}::uuid
     </update>
 
+    <delete id="delete" parameterType="com.example.kiosbankingbe.model.request.TicketRequest">
+        DELETE FROM ticket
+        WHERE id = #{id}::uuid
+    </delete>
+
     <update id="evaluate" parameterType="com.example.kiosbankingbe.model.request.TicketRequest">
         UPDATE ticket
         SET attitude = #{attitude},

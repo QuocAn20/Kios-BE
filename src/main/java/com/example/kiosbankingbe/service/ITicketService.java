@@ -17,6 +17,8 @@ public interface ITicketService {
 
     public BaseResponse updateTicket(TicketRequest request);
 
+    public BaseResponse deleteTicket(TicketRequest request);
+
     public BaseResponse evaluateTicket(TicketRequest request);
 
     public BaseResponse statisticMonthly(TicketRequest request);
